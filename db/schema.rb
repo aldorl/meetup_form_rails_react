@@ -11,13 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160505074838) do
+ActiveRecord::Schema.define(version: 20160506033547) do
 
   create_table "meetups", force: :cascade do |t|
     t.string   "title"
     t.text     "description"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.date     "date",        null: false
   end
 
 end

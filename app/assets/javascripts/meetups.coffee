@@ -165,6 +165,27 @@ FormInputWithLabelAndReset = React.createClass
 
 formInputWithLabelAndReset = React.createFactory(FormInputWithLabelAndReset)
 
+
+Separator = React.createClass
+    displayName: "Separator"
+
+    render: () ->
+        children = []
+        for child, i in @props.children
+            children.push( child )
+            if i < @props.children.length - 1
+                children.push(
+                    DOM.div
+                        key: "separator-#{i}"
+                        className: "col-lg-offset-2 col-lg-10"
+                    DOM.hr
+                        className:"form-input-separator"
+                )
+        DOM.div(null, children)
+
+separator = React.createFactory(Separator)
+
+
 window.CreateNewMeetupForm = React.createClass
     getInitialState: ->
         {
@@ -172,7 +193,8 @@ window.CreateNewMeetupForm = React.createClass
                 title: "",
                 description: "",
                 date: new Date(),
-                seoText: null
+                seoText: null,
+                guests: [""],
             },
             warnings: {
                 title: null
@@ -205,6 +227,20 @@ window.CreateNewMeetupForm = React.createClass
         words.push(@state.meetup.date.getFullYear().toString())
         words.filter( (string) -> string.trim().length > 0).join("-").toLowerCase()
 
+    guestEmailChanged: (number, event) ->
+        guests = @state.meetup.guests
+        guests[number] = event.target.value
+
+        lastEmail = guests[guests.length-1]
+        penultimateEmail = guests[guests.length-2]
+
+        if (lastEmail != "")
+            guests.push("")
+        if (guests.length >= 2 && lastEmail == "" && penultimateEmail == "")
+            guests.pop()
+
+        @forceUpdate()
+
     formSubmitted: (event) ->
         event.preventDefault()
         meetup = @state.meetup
@@ -226,6 +262,7 @@ window.CreateNewMeetupForm = React.createClass
                 description: meetup.description
                 date: "#{meetup.date.getFullYear()}-#{meetup.date.getMonth()+1}-#{meetup.date.getDate()}"
                 seo: @state.meetup.seoText || @computeDefaultSeoText()
+                guests: @state.meetup.guests
             }})
 
     render: ->
@@ -264,6 +301,21 @@ window.CreateNewMeetupForm = React.createClass
                     onChange: @seoChanged
                     placeholder: "SEO text"
                     labelText: "seo"
+
+            DOM.fieldset null,
+                DOM.legend null, "Guests"
+                separator null,
+                    for guest, n in @state.meetup.guests
+                        ((i) =>
+                            formInputWithLabel
+                                id: "email"
+                                key: "guest-#{i}"
+                                value: guest
+                                onChange: (event) =>
+                                    @guestEmailChanged(i, event)
+                                placeholder: "Email address of an invitee"
+                                labelText: "Email"
+                        )(n)
 
                 DOM.div
                     className: "form-group"

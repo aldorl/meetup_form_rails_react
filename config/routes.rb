@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :technologies
     # get 'meetups/new'
     resources :meetups, only: %w(new create)
 

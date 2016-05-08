@@ -1,4 +1,8 @@
 class MeetupsController < ApplicationController
+    def new
+        @technologies = Technology.all.to_a
+    end
+
     def create
         @meetup = Meetup.new(meetup_params)
         respond_to do |format|
@@ -15,6 +19,6 @@ class MeetupsController < ApplicationController
     private
 
     def meetup_params
-        params.require(:meetup).permit(:title, :description, :date, :seo, guests: [])
+        params.require(:meetup).permit(:title, :description, :date, :seo, :technology, guests: [])
     end
 end

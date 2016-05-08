@@ -178,8 +178,8 @@ Separator = React.createClass
                     DOM.div
                         key: "separator-#{i}"
                         className: "col-lg-offset-2 col-lg-10"
-                    DOM.hr
-                        className:"form-input-separator"
+                        DOM.hr
+                            className:"form-input-separator"
                 )
         DOM.div(null, children)
 
@@ -195,6 +195,7 @@ window.CreateNewMeetupForm = React.createClass
                 date: new Date(),
                 seoText: null,
                 guests: [""],
+                technology: @props.technologies[0].name,
             },
             warnings: {
                 title: null
@@ -241,6 +242,10 @@ window.CreateNewMeetupForm = React.createClass
 
         @forceUpdate()
 
+    technologyChanged: (event) ->
+        @state.meetup.technology = event.target.value
+        @forceUpdate()
+
     formSubmitted: (event) ->
         event.preventDefault()
         meetup = @state.meetup
@@ -251,6 +256,8 @@ window.CreateNewMeetupForm = React.createClass
         for own key of meetup
             return if @state.warnings[key]
 
+        date = "#{meetup.date.getFullYear()}-#{meetup.date.getMonth()+1}-#{meetup.date.getDate()}"
+        
         $.ajax
             url: "/meetups.json"
             type: "POST"
@@ -258,11 +265,12 @@ window.CreateNewMeetupForm = React.createClass
             contentType: "application/json"
             processData: false
             data: JSON.stringify({meetup: {
-                title: meetup.title
-                description: meetup.description
-                date: "#{meetup.date.getFullYear()}-#{meetup.date.getMonth()+1}-#{meetup.date.getDate()}"
-                seo: @state.meetup.seoText || @computeDefaultSeoText()
-                guests: @state.meetup.guests
+                title:          meetup.title
+                description:    meetup.description
+                date:           date
+                seo:            @state.meetup.seoText || @computeDefaultSeoText()
+                guests:         @state.meetup.guests
+                technology:     @state.meetup.technology
             }})
 
     render: ->
@@ -295,6 +303,20 @@ window.CreateNewMeetupForm = React.createClass
                     onChange: @dateChanged
                     date: @state.meetup.date
 
+                DOM.div
+                    className: "form-group"
+                    DOM.label
+                        htmlFor: "technology"
+                        className: "col-lg-2 control-label"
+                        "Technology"
+                    DOM.div
+                        className: 'col-lg-10'
+                        DOM.select
+                            className: "form-control"
+                            onChange: @technologyChanged
+                            value: @state.meetup.technology
+                            DOM.option(value: tech.name, key: tech.id, tech.name) for tech in @props.technologies
+
                 formInputWithLabelAndReset
                     id: "seo"
                     value: if @state.meetup.seoText? then @state.meetup.seoText else @computeDefaultSeoText()
@@ -326,4 +348,4 @@ window.CreateNewMeetupForm = React.createClass
                         className: "btn btn-primary"
                         "Save"
 
-createNewMeetupForm = React.createFactory(CreateNewMeetupForm)
+# createNewMeetupForm = React.createFactory(CreateNewMeetupForm)
